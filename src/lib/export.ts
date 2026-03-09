@@ -1,4 +1,10 @@
 import { TimeLog } from './storage';
+import type { jsPDF as jsPDFType } from 'jspdf';
+
+// jspdf-autotable extends jsPDF with lastAutoTable but doesn't export the type
+interface jsPDFWithAutoTable extends jsPDFType {
+  lastAutoTable: { finalY: number };
+}
 
 export async function exportToPDF(logs: TimeLog[], title: string): Promise<void> {
   const { default: jsPDF } = await import('jspdf');
@@ -39,8 +45,7 @@ export async function exportToPDF(logs: TimeLog[], title: string): Promise<void>
       theme: 'striped',
       headStyles: { fillColor: [255, 107, 0] },
     });
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-    y = (doc as any).lastAutoTable.finalY + 10;
+    y = (doc as unknown as jsPDFWithAutoTable).lastAutoTable.finalY + 10;
   }
 
   doc.save(`tidrapport-${new Date().toISOString().split('T')[0]}.pdf`);

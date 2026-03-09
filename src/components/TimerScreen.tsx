@@ -60,7 +60,7 @@ export default function TimerScreen() {
           </motion.div>
         ) : (
           <div className="bg-yellow-900/30 border border-yellow-600/50 rounded-xl p-3 text-center">
-            <p className="text-yellow-400 text-sm">🛰️ Hämtar GPS...</p>
+            <p className="text-yellow-400 text-sm">🛰️ {t.fetchingGps}</p>
           </div>
         )}
       </div>

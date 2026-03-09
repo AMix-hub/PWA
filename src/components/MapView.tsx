@@ -6,7 +6,8 @@ import { useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Fix leaflet default icon
+// Required workaround for Leaflet's default icon URLs breaking in Next.js bundling
+// See: https://github.com/Leaflet/Leaflet/issues/4968
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -59,7 +60,7 @@ export default function MapView() {
           <>
             <RecenterMap lat={userLocation.lat} lon={userLocation.lon} />
             <Marker position={[userLocation.lat, userLocation.lon]} icon={userIcon}>
-              <Popup>Din position</Popup>
+              <Popup>{t.yourPosition}</Popup>
             </Marker>
             <Circle
               center={[userLocation.lat, userLocation.lon]}
@@ -82,7 +83,7 @@ export default function MapView() {
                 <br />
                 {client.hourly_rate} kr/h
                 {nearbyClient?.id === client.id && (
-                  <><br /><span style={{ color: '#f97316' }}>✓ Inom 200m</span></>
+                  <><br /><span style={{ color: '#f97316' }}>✓ {t.within200m}</span></>
                 )}
               </div>
             </Popup>

@@ -49,6 +49,8 @@ export const translations = {
     shift: 'Arbetspass',
     rate: 'Taxa',
     total: 'Totalt',
+    fetchingGps: 'Hämtar GPS...',
+    yourPosition: 'Din position',
   },
   en: {
     appName: 'Time Tracker',
@@ -98,6 +100,8 @@ export const translations = {
     shift: 'Shift',
     rate: 'Rate',
     total: 'Total',
+    fetchingGps: 'Fetching GPS...',
+    yourPosition: 'Your position',
   },
 } as const;
 
