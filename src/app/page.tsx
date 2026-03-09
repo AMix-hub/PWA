@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <main className="relative">
       <SettingsButton />
-      <div className="pb-20">
+      <div className="pb-24">
         {activeTab === 'timer' && <TimerScreen />}
         {activeTab === 'clients' && <ClientsScreen />}
         {activeTab === 'logs' && <TimeLogsScreen />}

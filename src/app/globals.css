@@ -8,7 +8,7 @@
 }
 
 html {
-  height: -webkit-fill-available;
+  min-height: -webkit-fill-available;
   overscroll-behavior: none;
   background: #fffbf7;
 }
@@ -16,6 +16,7 @@ html {
 body {
   min-height: 100dvh;
   min-height: -webkit-fill-available;
+  overflow-y: auto;
   overscroll-behavior: none;
   background: linear-gradient(160deg, #fffbf7 0%, #fff4ec 55%, #fde8d5 100%);
   background-attachment: fixed;
@@ -29,4 +30,13 @@ body {
 /* Safe area for notched phones */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Timer active indicator pulse */
+@keyframes nav-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.85); }
+}
+.nav-indicator-pulse {
+  animation: nav-pulse 1.5s ease-in-out infinite;
 }
