@@ -18,7 +18,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#0a0a0a',
+  themeColor: '#0f0c29',
 };
 
 export default function RootLayout({
@@ -28,7 +28,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="sv" className="dark">
-      <body className="bg-gray-950 text-white antialiased font-sans">
+      <body className="text-white antialiased font-sans">
         <AppProvider>{children}</AppProvider>
       </body>
     </html>
