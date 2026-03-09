@@ -14,29 +14,45 @@ export default function BottomNav() {
   const { activeTab, setActiveTab, t, activeTimer } = useApp();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t-2 border-gray-800 z-40 safe-area-bottom">
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-40 safe-area-bottom"
+      style={{
+        background: 'rgba(255,255,255,0.9)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderTop: '1px solid rgba(0,0,0,0.07)',
+        boxShadow: '0 -4px 24px rgba(0,0,0,0.06)',
+      }}
+    >
       <div className="flex max-w-md mx-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 py-3 pb-4 flex flex-col items-center gap-1 transition-colors relative
-              ${activeTab === tab.id ? 'text-orange-400' : 'text-gray-500'}
+              ${activeTab === tab.id ? 'text-orange-500' : 'text-stone-400'}
             `}
             style={{ touchAction: 'manipulation', minHeight: 64 }}
           >
             {activeTab === tab.id && (
               <motion.div
                 layoutId="activeTab"
-                className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-1 bg-orange-500 rounded-full"
+                className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full"
+                style={{
+                  width: 40,
+                  background: 'linear-gradient(90deg, #fb923c, #f97316)',
+                  boxShadow: '0 0 8px rgba(249,115,22,0.4)',
+                }}
               />
             )}
             <span style={{ fontSize: 26 }}>{tab.icon}</span>
-            <span className={`text-xs font-semibold ${activeTab === tab.id ? 'text-orange-400' : 'text-gray-500'}`}>
+            <span
+              className={`text-xs font-semibold ${activeTab === tab.id ? 'text-orange-500' : 'text-stone-400'}`}
+            >
               {t[tab.labelKey]}
             </span>
             {tab.id === 'timer' && activeTimer && (
-              <span className="absolute top-2 right-3 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+              <span className="absolute top-2 right-3 w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse" />
             )}
           </button>
         ))}

@@ -10,14 +10,15 @@
 html {
   height: -webkit-fill-available;
   overscroll-behavior: none;
-  background: #030712;
+  background: #fffbf7;
 }
 
 body {
   min-height: 100dvh;
   min-height: -webkit-fill-available;
   overscroll-behavior: none;
-  background: #030712;
+  background: linear-gradient(160deg, #fffbf7 0%, #fff4ec 55%, #fde8d5 100%);
+  background-attachment: fixed;
 }
 
 /* Leaflet fix for Next.js */
