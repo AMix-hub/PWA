@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { Client } from '@/lib/clients';
 import { TimeLog, ActiveTimer, getClients, saveClients, getLogs, saveLogs, getActiveTimer, saveActiveTimer, getLanguage, saveLanguage } from '@/lib/storage';
 import { findNearestClient } from '@/lib/haversine';
@@ -73,7 +73,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(id);
   }, [activeTimer]);
 
-  // GPS tracking
+  // Keep a ref to clients so the GPS watch callback always sees the latest list
+  // without needing to restart the watch when clients change.
+  const clientsRef = useRef(clients);
+  useEffect(() => { clientsRef.current = clients; }, [clients]);
+
+  // Update nearby client whenever clients list or user location changes.
+  useEffect(() => {
+    if (userLocation) {
+      setNearbyClient(findNearestClient(userLocation.lat, userLocation.lon, clientsRef.current));
+    }
+  }, [clients, userLocation]);
+
+  // GPS tracking – started once, never restarted.
+  // maximumAge: 0 forces the device to return a fresh position every time.
   useEffect(() => {
     if (!navigator.geolocation) {
       setLocationError('Geolocation not supported');
@@ -85,17 +98,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const loc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         setUserLocation(loc);
         setLocationError(null);
-        const nearest = findNearestClient(loc.lat, loc.lon, clients);
-        setNearbyClient(nearest);
+        setNearbyClient(findNearestClient(loc.lat, loc.lon, clientsRef.current));
       },
       (err) => {
         setLocationError(err.message);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
 
     return () => navigator.geolocation.clearWatch(watchId);
-  }, [clients]);
+  }, []); // GPS watch is intentionally started once on mount; clientsRef keeps the callback up-to-date without restarting the watch. eslint-disable-line react-hooks/exhaustive-deps
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
