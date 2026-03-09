@@ -56,6 +56,11 @@ export const translations = {
     total: 'Totalt',
     fetchingGps: 'Hämtar GPS...',
     yourPosition: 'Din position',
+    searchCoordinates: 'Hämta koordinater',
+    geocoding: 'Söker adress...',
+    geocodeError: 'Hittade inte adressen',
+    geocodeSuccess: 'Koordinater hittade!',
+    coordinatesAutoFilled: 'Koordinater ifyllda automatiskt',
   },
   en: {
     appName: 'Time Tracker',
@@ -112,6 +117,11 @@ export const translations = {
     total: 'Total',
     fetchingGps: 'Fetching GPS...',
     yourPosition: 'Your position',
+    searchCoordinates: 'Get coordinates',
+    geocoding: 'Searching address...',
+    geocodeError: 'Address not found',
+    geocodeSuccess: 'Coordinates found!',
+    coordinatesAutoFilled: 'Coordinates auto-filled',
   },
 } as const;
 
