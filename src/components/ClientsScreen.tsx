@@ -3,7 +3,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/context/AppContext';
 import { Client } from '@/lib/clients';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface ClientFormData {
   name: string;
@@ -11,15 +12,6 @@ interface ClientFormData {
   latitude: string;
   longitude: string;
   hourly_rate: string;
-}
-
-type InputMode = 'decimal' | 'numeric' | 'text' | 'tel' | 'search' | 'email' | 'url' | 'none';
-
-interface FormField {
-  key: keyof ClientFormData;
-  label: string;
-  type: string;
-  inputMode?: InputMode;
 }
 
 const emptyForm: ClientFormData = {
@@ -35,6 +27,9 @@ export default function ClientsScreen() {
   const [showForm, setShowForm] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [form, setForm] = useState<ClientFormData>(emptyForm);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const openAdd = () => {
     setEditingClient(null);
@@ -189,97 +184,229 @@ export default function ClientsScreen() {
         )}
       </div>
 
-      {/* Form Modal */}
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 flex items-end justify-center z-50"
-            style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}
-            onClick={() => setShowForm(false)}
-          >
+      {/* Form Modal – rendered via portal so position:fixed always covers the full viewport */}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {showForm && (
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25 }}
-              className="w-full max-w-md rounded-t-3xl bg-white flex flex-col"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               style={{
-                borderTop: '1px solid rgba(0,0,0,0.06)',
-                boxShadow: '0 -8px 40px rgba(0,0,0,0.08)',
-                maxHeight: '88vh',
+                position: 'fixed',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'flex-end',
+                justifyContent: 'center',
+                zIndex: 9999,
+                background: 'rgba(0,0,0,0.55)',
               }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={() => setShowForm(false)}
             >
-              {/* Modal Header */}
-              <div className="px-6 pt-5 pb-2 flex-shrink-0">
-                <div className="w-10 h-1 rounded-full mx-auto mb-4" style={{ background: '#e7e5e4' }} />
-                <h3 className="text-stone-900 text-xl font-bold">
-                  {editingClient ? t.editClient : t.addClient}
-                </h3>
-              </div>
-
-              {/* Scrollable Fields */}
-              <div className="overflow-y-auto flex-1 px-6 py-2">
-                <div className="space-y-4">
-                  {(
-                    [
-                      { key: 'name', label: t.clientName, type: 'text' },
-                      { key: 'address', label: t.address, type: 'text' },
-                      { key: 'latitude', label: t.latitude, type: 'number', inputMode: 'decimal' },
-                      { key: 'longitude', label: t.longitude, type: 'number', inputMode: 'decimal' },
-                      { key: 'hourly_rate', label: t.hourlyRate, type: 'number', inputMode: 'decimal' },
-                    ] as FormField[]
-                  ).map(({ key, label, type, inputMode }) => (
-                    <div key={key}>
-                      <label className="text-stone-500 text-sm font-medium mb-1.5 block">{label}</label>
-                      <input
-                        type={type}
-                        inputMode={inputMode}
-                        value={form[key]}
-                        onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                        className="w-full text-stone-900 rounded-xl px-4 py-3 focus:outline-none transition-all"
-                        style={{
-                          background: '#fafaf9',
-                          border: '1.5px solid #e7e5e4',
-                          fontSize: 16,
-                        }}
-                        step={type === 'number' ? 'any' : undefined}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Sticky Footer Buttons */}
-              <div
-                className="px-6 pt-4 pb-6 flex-shrink-0 flex gap-3"
-                style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+                style={{
+                  width: '100%',
+                  maxWidth: 448,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '28px 28px 0 0',
+                  boxShadow: '0 -16px 60px rgba(0,0,0,0.2)',
+                  maxHeight: '90vh',
+                }}
+                onClick={(e) => e.stopPropagation()}
               >
-                <button
-                  onClick={() => setShowForm(false)}
-                  className="flex-1 rounded-xl py-3.5 font-semibold text-stone-500 transition-all"
-                  style={{ background: '#f5f5f4', border: '1px solid rgba(0,0,0,0.06)' }}
-                >
-                  {t.cancel}
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="flex-1 text-white rounded-xl py-3.5 font-semibold transition-all"
-                  style={{
-                    background: 'linear-gradient(135deg, #fb923c, #f97316)',
-                    boxShadow: '0 4px 16px rgba(249,115,22,0.3)',
-                  }}
-                >
-                  {t.save}
-                </button>
-              </div>
+                {/* Drag handle */}
+                <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 16, paddingBottom: 4, flexShrink: 0 }}>
+                  <div style={{ width: 40, height: 6, borderRadius: 99, background: '#d6d3d1' }} />
+                </div>
+
+                {/* Modal Header */}
+                <div style={{ padding: '12px 24px 16px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 14,
+                      background: 'linear-gradient(135deg, #fb923c, #f97316)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <line x1="19" y1="8" x2="19" y2="14" />
+                      <line x1="22" y1="11" x2="16" y2="11" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#1c1917', lineHeight: 1.2 }}>
+                      {editingClient ? t.editClient : t.addClient}
+                    </h3>
+                    <p style={{ margin: 0, fontSize: 12, color: '#a8a29e', marginTop: 2 }}>
+                      {editingClient ? t.editClientSubtitle : t.addClientSubtitle}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div style={{ height: 1, background: '#f5f5f4', flexShrink: 0 }} />
+
+                {/* Scrollable Fields */}
+                <div style={{ overflowY: 'auto', flex: 1, padding: '20px 24px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+                    {/* Client Name */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#f97316', marginBottom: 6 }}>
+                        {t.clientName}
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#c7c3c0', pointerEvents: 'none', lineHeight: 0 }}>
+                          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                          </svg>
+                        </span>
+                        <input
+                          type="text"
+                          value={form.name}
+                          onChange={(e) => setForm({ ...form, name: e.target.value })}
+                          placeholder={`${t.eg} Bygg AB Stockholm`}
+                          className="client-input"
+                          style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', border: '1.5px solid #e5e7eb', borderRadius: 12, paddingLeft: 36, paddingRight: 16, paddingTop: 12, paddingBottom: 12, fontSize: 16, color: '#1c1917' }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Address */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#f97316', marginBottom: 6 }}>
+                        {t.address}
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#c7c3c0', pointerEvents: 'none', lineHeight: 0 }}>
+                          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+                          </svg>
+                        </span>
+                        <input
+                          type="text"
+                          value={form.address}
+                          onChange={(e) => setForm({ ...form, address: e.target.value })}
+                          placeholder={`${t.eg} Sveavägen 44, Stockholm`}
+                          className="client-input"
+                          style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', border: '1.5px solid #e5e7eb', borderRadius: 12, paddingLeft: 36, paddingRight: 16, paddingTop: 12, paddingBottom: 12, fontSize: 16, color: '#1c1917' }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Coordinates – side by side */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#f97316', marginBottom: 6 }}>
+                        {t.coordinates}
+                      </label>
+                      <div style={{ display: 'flex', gap: 12 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ position: 'relative' }}>
+                            <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#c7c3c0', pointerEvents: 'none', lineHeight: 0 }}>
+                              <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="12" y1="2" x2="12" y2="22" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                              </svg>
+                            </span>
+                            <input
+                              type="number"
+                              inputMode="decimal"
+                              value={form.latitude}
+                              onChange={(e) => setForm({ ...form, latitude: e.target.value })}
+                              placeholder="57.70"
+                              step="any"
+                              className="client-input"
+                              style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', border: '1.5px solid #e5e7eb', borderRadius: 12, paddingLeft: 28, paddingRight: 10, paddingTop: 12, paddingBottom: 12, fontSize: 15, color: '#1c1917' }}
+                            />
+                          </div>
+                          <p style={{ margin: '4px 0 0 4px', fontSize: 11, color: '#a8a29e' }}>{t.latitude}</p>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ position: 'relative' }}>
+                            <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#c7c3c0', pointerEvents: 'none', lineHeight: 0 }}>
+                              <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="2" y1="12" x2="22" y2="12" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                              </svg>
+                            </span>
+                            <input
+                              type="number"
+                              inputMode="decimal"
+                              value={form.longitude}
+                              onChange={(e) => setForm({ ...form, longitude: e.target.value })}
+                              placeholder="11.96"
+                              step="any"
+                              className="client-input"
+                              style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', border: '1.5px solid #e5e7eb', borderRadius: 12, paddingLeft: 28, paddingRight: 10, paddingTop: 12, paddingBottom: 12, fontSize: 15, color: '#1c1917' }}
+                            />
+                          </div>
+                          <p style={{ margin: '4px 0 0 4px', fontSize: 11, color: '#a8a29e' }}>{t.longitude}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Hourly Rate */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#f97316', marginBottom: 6 }}>
+                        {t.hourlyRate}
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#c7c3c0', pointerEvents: 'none', lineHeight: 0 }}>
+                          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                          </svg>
+                        </span>
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          value={form.hourly_rate}
+                          onChange={(e) => setForm({ ...form, hourly_rate: e.target.value })}
+                          placeholder="850"
+                          step="any"
+                          className="client-input"
+                          style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', border: '1.5px solid #e5e7eb', borderRadius: 12, paddingLeft: 36, paddingRight: 48, paddingTop: 12, paddingBottom: 12, fontSize: 16, color: '#1c1917' }}
+                        />
+                        <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 13, fontWeight: 600, color: '#a8a29e', pointerEvents: 'none' }}>
+                          kr/h
+                        </span>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Sticky Footer */}
+                <div style={{ padding: '16px 24px 32px', flexShrink: 0, display: 'flex', gap: 12, borderTop: '1px solid #f5f5f4' }}>
+                  <button
+                    onClick={() => setShowForm(false)}
+                    style={{ flex: 1, borderRadius: 18, paddingTop: 16, paddingBottom: 16, fontWeight: 600, fontSize: 15, color: '#78716c', background: '#f5f5f4', border: '1.5px solid #e7e5e4', cursor: 'pointer' }}
+                  >
+                    {t.cancel}
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    style={{ flex: 2, borderRadius: 18, paddingTop: 16, paddingBottom: 16, fontWeight: 700, fontSize: 15, color: '#ffffff', background: 'linear-gradient(135deg, #fb923c, #f97316)', border: 'none', boxShadow: '0 4px 20px rgba(249,115,22,0.35)', cursor: 'pointer' }}
+                  >
+                    {t.save}
+                  </button>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
