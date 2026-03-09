@@ -40,3 +40,10 @@ body {
 .nav-indicator-pulse {
   animation: nav-pulse 1.5s ease-in-out infinite;
 }
+
+/* Form input focus ring */
+.client-input:focus {
+  outline: none;
+  border-color: #f97316 !important;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+}
