@@ -52,27 +52,50 @@ export async function exportToPDF(logs: TimeLog[], title: string): Promise<void>
 }
 
 export async function exportToExcel(logs: TimeLog[], _title: string): Promise<void> {
-  const XLSX = await import('xlsx');
-  
-  const rows = logs.map((log) => {
+  const ExcelJS = await import('exceljs');
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet('Tidrapport');
+
+  sheet.columns = [
+    { header: 'Datum',       key: 'datum',    width: 14 },
+    { header: 'Klient',      key: 'klient',   width: 28 },
+    { header: 'Start',       key: 'start',    width: 8  },
+    { header: 'Slut',        key: 'slut',     width: 8  },
+    { header: 'Timmar',      key: 'timmar',   width: 10 },
+    { header: 'Taxa (kr/h)', key: 'taxa',     width: 12 },
+    { header: 'Intjänat (kr)', key: 'intjanat', width: 14 },
+  ];
+
+  // Style the header row
+  const headerRow = sheet.getRow(1);
+  headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF6B00' } };
+
+  for (const log of logs) {
     const duration = log.endTime - log.startTime;
     const hours = duration / 3600000;
     const earned = hours * log.hourlyRate;
-    return {
-      Datum: new Date(log.startTime).toLocaleDateString('sv-SE'),
-      Klient: log.clientName,
-      Start: new Date(log.startTime).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }),
-      Slut: new Date(log.endTime).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }),
-      'Timmar': parseFloat(hours.toFixed(2)),
-      'Taxa (kr/h)': log.hourlyRate,
-      'Intjänat (kr)': parseFloat(earned.toFixed(0)),
-    };
-  });
+    sheet.addRow({
+      datum:    new Date(log.startTime).toLocaleDateString('sv-SE'),
+      klient:   log.clientName,
+      start:    new Date(log.startTime).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }),
+      slut:     new Date(log.endTime).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }),
+      timmar:   parseFloat(hours.toFixed(2)),
+      taxa:     log.hourlyRate,
+      intjanat: parseFloat(earned.toFixed(0)),
+    });
+  }
 
-  const ws = XLSX.utils.json_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Tidrapport');
-  XLSX.writeFile(wb, `tidrapport-${new Date().toISOString().split('T')[0]}.xlsx`);
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `tidrapport-${new Date().toISOString().split('T')[0]}.xlsx`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function groupLogsByDate(logs: TimeLog[]): Record<string, TimeLog[]> {
