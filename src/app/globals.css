@@ -10,14 +10,14 @@
 html {
   height: -webkit-fill-available;
   overscroll-behavior: none;
-  background: #0f0c29;
+  background: #fffbf7;
 }
 
 body {
   min-height: 100dvh;
   min-height: -webkit-fill-available;
   overscroll-behavior: none;
-  background: linear-gradient(135deg, #0f0c29 0%, #1a1040 40%, #0d1f3c 100%);
+  background: linear-gradient(160deg, #fffbf7 0%, #fff4ec 55%, #fde8d5 100%);
   background-attachment: fixed;
 }
 
