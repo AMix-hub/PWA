@@ -28,12 +28,46 @@ export default function ClientsScreen() {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [form, setForm] = useState<ClientFormData>(emptyForm);
   const [mounted, setMounted] = useState(false);
+  const [geocoding, setGeocoding] = useState(false);
+  const [geocodeStatus, setGeocodeStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   useEffect(() => { setMounted(true); }, []);
+
+  const handleGeocode = async () => {
+    const address = form.address.trim();
+    if (!address) return;
+    setGeocoding(true);
+    setGeocodeStatus('idle');
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`;
+      const res = await fetch(url, {
+        headers: {
+          'Accept-Language': 'sv',
+          'User-Agent': 'AMix-PWA-TimeTracker/1.0 (https://github.com/AMix-hub/PWA)',
+        },
+      });
+      const data = await res.json();
+      if (data && data.length > 0) {
+        setForm((prev) => ({
+          ...prev,
+          latitude: parseFloat(data[0].lat).toFixed(6),
+          longitude: parseFloat(data[0].lon).toFixed(6),
+        }));
+        setGeocodeStatus('success');
+      } else {
+        setGeocodeStatus('error');
+      }
+    } catch {
+      setGeocodeStatus('error');
+    } finally {
+      setGeocoding(false);
+    }
+  };
 
   const openAdd = () => {
     setEditingClient(null);
     setForm(emptyForm);
+    setGeocodeStatus('idle');
     setShowForm(true);
   };
 
@@ -46,6 +80,7 @@ export default function ClientsScreen() {
       longitude: String(client.longitude),
       hourly_rate: String(client.hourly_rate),
     });
+    setGeocodeStatus('idle');
     setShowForm(true);
   };
 
@@ -290,21 +325,82 @@ export default function ClientsScreen() {
                       <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#f97316', marginBottom: 6 }}>
                         {t.address}
                       </label>
-                      <div style={{ position: 'relative' }}>
-                        <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#c7c3c0', pointerEvents: 'none', lineHeight: 0 }}>
-                          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
-                          </svg>
-                        </span>
-                        <input
-                          type="text"
-                          value={form.address}
-                          onChange={(e) => setForm({ ...form, address: e.target.value })}
-                          placeholder={`${t.eg} Sveavägen 44, Stockholm`}
-                          className="client-input"
-                          style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', border: '1.5px solid #e5e7eb', borderRadius: 12, paddingLeft: 36, paddingRight: 16, paddingTop: 12, paddingBottom: 12, fontSize: 16, color: '#1c1917' }}
-                        />
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <div style={{ position: 'relative', flex: 1 }}>
+                          <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#c7c3c0', pointerEvents: 'none', lineHeight: 0 }}>
+                            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+                            </svg>
+                          </span>
+                          <input
+                            type="text"
+                            value={form.address}
+                            onChange={(e) => { setForm({ ...form, address: e.target.value }); setGeocodeStatus('idle'); }}
+                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleGeocode(); } }}
+                            placeholder={`${t.eg} Sveavägen 44, Stockholm`}
+                            className="client-input"
+                            style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', border: '1.5px solid #e5e7eb', borderRadius: 12, paddingLeft: 36, paddingRight: 16, paddingTop: 12, paddingBottom: 12, fontSize: 16, color: '#1c1917' }}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleGeocode}
+                          disabled={geocoding || !form.address.trim()}
+                          title={t.searchCoordinates}
+                          style={{
+                            flexShrink: 0,
+                            width: 46,
+                            borderRadius: 12,
+                            border: 'none',
+                            background: geocoding
+                              ? '#f5f5f4'
+                              : geocodeStatus === 'error'
+                                ? '#fff1f2'
+                                : 'linear-gradient(135deg, #fb923c, #f97316)',
+                            color: geocoding ? '#a8a29e' : geocodeStatus === 'error' ? '#e11d48' : '#ffffff',
+                            cursor: geocoding || !form.address.trim() ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: geocoding ? 'none' : '0 2px 8px rgba(249,115,22,0.25)',
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          {geocoding ? (
+                            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83">
+                                <animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite" />
+                              </path>
+                            </svg>
+                          ) : geocodeStatus === 'error' ? (
+                            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                          ) : (
+                            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                          )}
+                        </button>
                       </div>
+                      {geocodeStatus === 'success' && (
+                        <motion.p
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          style={{ margin: '5px 0 0 4px', fontSize: 11, color: '#16a34a', fontWeight: 600 }}
+                        >
+                          ✓ {t.coordinatesAutoFilled}
+                        </motion.p>
+                      )}
+                      {geocodeStatus === 'error' && (
+                        <motion.p
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          style={{ margin: '5px 0 0 4px', fontSize: 11, color: '#e11d48', fontWeight: 600 }}
+                        >
+                          {t.geocodeError}
+                        </motion.p>
+                      )}
                     </div>
 
                     {/* Coordinates – side by side */}
@@ -315,10 +411,8 @@ export default function ClientsScreen() {
                       <div style={{ display: 'flex', gap: 12 }}>
                         <div style={{ flex: 1 }}>
                           <div style={{ position: 'relative' }}>
-                            <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#c7c3c0', pointerEvents: 'none', lineHeight: 0 }}>
-                              <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="12" y1="2" x2="12" y2="22" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                              </svg>
+                            <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#c7c3c0', pointerEvents: 'none', fontSize: 10, fontWeight: 700, letterSpacing: '0.04em' }}>
+                              N
                             </span>
                             <input
                               type="number"
@@ -328,17 +422,15 @@ export default function ClientsScreen() {
                               placeholder="57.70"
                               step="any"
                               className="client-input"
-                              style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', border: '1.5px solid #e5e7eb', borderRadius: 12, paddingLeft: 28, paddingRight: 10, paddingTop: 12, paddingBottom: 12, fontSize: 15, color: '#1c1917' }}
+                              style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', border: '1.5px solid #e5e7eb', borderRadius: 12, paddingLeft: 22, paddingRight: 10, paddingTop: 12, paddingBottom: 12, fontSize: 15, color: '#1c1917' }}
                             />
                           </div>
                           <p style={{ margin: '4px 0 0 4px', fontSize: 11, color: '#a8a29e' }}>{t.latitude}</p>
                         </div>
                         <div style={{ flex: 1 }}>
                           <div style={{ position: 'relative' }}>
-                            <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#c7c3c0', pointerEvents: 'none', lineHeight: 0 }}>
-                              <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="2" y1="12" x2="22" y2="12" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                              </svg>
+                            <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#c7c3c0', pointerEvents: 'none', fontSize: 10, fontWeight: 700, letterSpacing: '0.04em' }}>
+                              E
                             </span>
                             <input
                               type="number"
@@ -348,7 +440,7 @@ export default function ClientsScreen() {
                               placeholder="11.96"
                               step="any"
                               className="client-input"
-                              style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', border: '1.5px solid #e5e7eb', borderRadius: 12, paddingLeft: 28, paddingRight: 10, paddingTop: 12, paddingBottom: 12, fontSize: 15, color: '#1c1917' }}
+                              style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', border: '1.5px solid #e5e7eb', borderRadius: 12, paddingLeft: 22, paddingRight: 10, paddingTop: 12, paddingBottom: 12, fontSize: 15, color: '#1c1917' }}
                             />
                           </div>
                           <p style={{ margin: '4px 0 0 4px', fontSize: 11, color: '#a8a29e' }}>{t.longitude}</p>
@@ -362,11 +454,6 @@ export default function ClientsScreen() {
                         {t.hourlyRate}
                       </label>
                       <div style={{ position: 'relative' }}>
-                        <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#c7c3c0', pointerEvents: 'none', lineHeight: 0 }}>
-                          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                          </svg>
-                        </span>
                         <input
                           type="number"
                           inputMode="decimal"
@@ -375,7 +462,7 @@ export default function ClientsScreen() {
                           placeholder="850"
                           step="any"
                           className="client-input"
-                          style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', border: '1.5px solid #e5e7eb', borderRadius: 12, paddingLeft: 36, paddingRight: 48, paddingTop: 12, paddingBottom: 12, fontSize: 16, color: '#1c1917' }}
+                          style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#ffffff', border: '1.5px solid #e5e7eb', borderRadius: 12, paddingLeft: 16, paddingRight: 52, paddingTop: 12, paddingBottom: 12, fontSize: 16, color: '#1c1917' }}
                         />
                         <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 13, fontWeight: 600, color: '#a8a29e', pointerEvents: 'none' }}>
                           kr/h
