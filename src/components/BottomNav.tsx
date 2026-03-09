@@ -78,13 +78,13 @@ export default function BottomNav() {
           pointerEvents: 'auto',
           width: '100%',
           maxWidth: 420,
-          background: 'rgba(255,255,255,0.85)',
+          background: 'rgba(10, 15, 35, 0.80)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
           borderRadius: 28,
-          border: '1px solid rgba(255,255,255,0.7)',
+          border: '1px solid rgba(255,255,255,0.10)',
           boxShadow:
-            '0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
+            '0 8px 32px rgba(0,0,0,0.50), 0 2px 8px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.06)',
           padding: '6px',
         }}
       >
@@ -105,7 +105,7 @@ export default function BottomNav() {
                 borderRadius: 22,
                 gap: 4,
                 touchAction: 'manipulation',
-                color: isActive ? '#f97316' : '#a8a29e',
+                color: isActive ? '#a5b4fc' : '#475569',
                 transition: 'color 0.2s ease',
                 cursor: 'pointer',
                 border: 'none',
@@ -119,7 +119,7 @@ export default function BottomNav() {
                     position: 'absolute',
                     inset: 0,
                     borderRadius: 22,
-                    background: 'rgba(249,115,22,0.12)',
+                    background: 'rgba(99,102,241,0.18)',
                   }}
                   transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                 />

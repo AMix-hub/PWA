@@ -61,6 +61,9 @@ export const translations = {
     geocodeError: 'Hittade inte adressen',
     geocodeSuccess: 'Koordinater hittade!',
     coordinatesAutoFilled: 'Koordinater ifyllda automatiskt',
+    fieldRequired: 'Obligatoriskt fält',
+    invalidCoords: 'Ange giltiga koordinater (t.ex. använd sök-knappen)',
+    invalidRate: 'Ange ett giltigt timpris',
   },
   en: {
     appName: 'Time Tracker',
@@ -122,6 +125,9 @@ export const translations = {
     geocodeError: 'Address not found',
     geocodeSuccess: 'Coordinates found!',
     coordinatesAutoFilled: 'Coordinates auto-filled',
+    fieldRequired: 'Required field',
+    invalidCoords: 'Enter valid coordinates (e.g. use the search button)',
+    invalidRate: 'Enter a valid hourly rate',
   },
 } as const;
 

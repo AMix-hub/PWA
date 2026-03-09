@@ -47,20 +47,20 @@ export default function TimerScreen() {
         {locationError ? (
           <div
             className="rounded-2xl px-4 py-3 text-center"
-            style={{ background: '#fef2f2', border: '1px solid #fecaca' }}
+            style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)' }}
           >
-            <p className="text-red-600 text-base font-semibold">⚠️ {t.locationPermission}</p>
+            <p style={{ color: '#f87171', fontSize: 14, fontWeight: 600 }}>⚠️ {t.locationPermission}</p>
           </div>
         ) : userLocation ? (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             className="rounded-2xl px-4 py-3 text-center"
-            style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}
+            style={{ background: 'rgba(16,185,129,0.10)', border: '1px solid rgba(16,185,129,0.22)' }}
           >
-            <p className="text-green-700 text-sm font-semibold">📍 {t.gpsTracking}</p>
+            <p style={{ color: '#34d399', fontSize: 13, fontWeight: 600 }}>📍 {t.gpsTracking}</p>
             {nearbyClient && (
-              <p className="text-orange-600 font-bold text-base mt-0.5">
+              <p style={{ color: '#f97316', fontWeight: 700, fontSize: 15, marginTop: 2 }}>
                 🔔 {t.within200m}: {nearbyClient.name}
               </p>
             )}
@@ -68,9 +68,9 @@ export default function TimerScreen() {
         ) : (
           <div
             className="rounded-2xl px-4 py-3 text-center"
-            style={{ background: '#fffbeb', border: '1px solid #fde68a' }}
+            style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.22)' }}
           >
-            <p className="text-amber-700 text-sm font-semibold">🛰️ {t.fetchingGps}</p>
+            <p style={{ color: '#fbbf24', fontSize: 13, fontWeight: 600 }}>🛰️ {t.fetchingGps}</p>
           </div>
         )}
       </div>
@@ -79,15 +79,15 @@ export default function TimerScreen() {
       <div className="w-full max-w-sm text-center mb-6">
         {isRunning ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <p className="text-stone-400 text-xs uppercase tracking-[0.2em] mb-1">{t.currentClient}</p>
-            <p className="text-stone-900 text-2xl font-extrabold leading-tight">
+            <p style={{ color: '#475569', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 4, fontWeight: 600 }}>{t.currentClient}</p>
+            <p style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 800, lineHeight: 1.2 }}>
               {activeTimer?.clientName || t.noClient}
             </p>
-            <p className="text-orange-500 text-xl font-bold mt-1">+ {earnedSoFar} kr</p>
+            <p style={{ color: '#f97316', fontSize: 20, fontWeight: 700, marginTop: 4 }}>+ {earnedSoFar} kr</p>
           </motion.div>
         ) : (
           <div>
-            <p className="text-stone-400 text-base">
+            <p style={{ color: '#475569', fontSize: 15 }}>
               {nearbyClient ? `📍 ${nearbyClient.name}` : t.noClient}
             </p>
           </div>
@@ -105,12 +105,12 @@ export default function TimerScreen() {
               exit={{ scale: 0.85, opacity: 0 }}
             >
               <p
-                className="font-mono font-black tracking-tight text-stone-900"
-                style={{ fontSize: 'clamp(3rem, 14vw, 5rem)' }}
+                className="font-mono font-black tracking-tight"
+                style={{ fontSize: 'clamp(3rem, 14vw, 5rem)', color: '#f1f5f9' }}
               >
                 {formatDuration(elapsed)}
               </p>
-              <p className="text-orange-500 text-xs uppercase tracking-[0.2em] mt-1 font-semibold">
+              <p style={{ color: '#ef4444', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: 4, fontWeight: 700 }}>
                 ● {t.timerRunning}
               </p>
             </motion.div>
@@ -123,11 +123,11 @@ export default function TimerScreen() {
             >
               <p
                 className="font-mono font-black tracking-tight"
-                style={{ fontSize: 'clamp(3rem, 14vw, 5rem)', color: '#e7e5e4' }}
+                style={{ fontSize: 'clamp(3rem, 14vw, 5rem)', color: 'rgba(255,255,255,0.15)' }}
               >
                 00:00:00
               </p>
-              <p className="text-stone-400 text-xs uppercase tracking-[0.2em] mt-1 font-semibold">
+              <p style={{ color: '#334155', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: 4, fontWeight: 600 }}>
                 {t.timerStopped}
               </p>
             </motion.div>
@@ -141,13 +141,13 @@ export default function TimerScreen() {
           <>
             <motion.span
               className="absolute rounded-full"
-              style={{ width: 300, height: 300, border: '3px solid rgba(244,63,94,0.3)' }}
+              style={{ width: 300, height: 300, border: '3px solid rgba(239,68,68,0.3)' }}
               animate={{ scale: [1, 1.25, 1], opacity: [0.5, 0, 0.5] }}
               transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
             />
             <motion.span
               className="absolute rounded-full"
-              style={{ width: 300, height: 300, border: '3px solid rgba(244,63,94,0.15)' }}
+              style={{ width: 300, height: 300, border: '3px solid rgba(239,68,68,0.15)' }}
               animate={{ scale: [1, 1.45, 1], opacity: [0.3, 0, 0.3] }}
               transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
             />
@@ -162,9 +162,9 @@ export default function TimerScreen() {
             height: 260,
             borderRadius: '50%',
             background: isRunning
-              ? 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)'
-              : 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
-            border: `2px solid ${isRunning ? 'rgba(251,113,133,0.4)' : 'rgba(253,186,116,0.5)'}`,
+              ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+              : 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+            border: `2px solid ${isRunning ? 'rgba(239,68,68,0.4)' : 'rgba(139,92,246,0.4)'}`,
             color: '#ffffff',
             fontWeight: 900,
             display: 'flex',
@@ -176,8 +176,8 @@ export default function TimerScreen() {
             touchAction: 'manipulation',
             cursor: 'pointer',
             boxShadow: isRunning
-              ? '0 0 50px rgba(244,63,94,0.3), 0 16px 48px rgba(0,0,0,0.12)'
-              : '0 0 50px rgba(249,115,22,0.25), 0 16px 48px rgba(0,0,0,0.1)',
+              ? '0 0 60px rgba(239,68,68,0.35), 0 16px 48px rgba(0,0,0,0.4)'
+              : '0 0 60px rgba(99,102,241,0.30), 0 16px 48px rgba(0,0,0,0.4)',
             transition: 'background 0.3s ease, box-shadow 0.3s ease',
           }}
         >
@@ -206,14 +206,16 @@ export default function TimerScreen() {
               transition={{ type: 'spring', damping: 26, stiffness: 280 }}
               className="w-full max-w-md rounded-t-3xl p-6 pb-8"
               style={{
-                background: '#ffffff',
-                borderTop: '1px solid rgba(0,0,0,0.06)',
-                boxShadow: '0 -8px 40px rgba(0,0,0,0.08)',
+                background: 'rgba(10,15,35,0.98)',
+                borderTop: '1px solid rgba(255,255,255,0.10)',
+                boxShadow: '0 -16px 60px rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: '#e7e5e4' }} />
-              <h3 className="text-stone-900 text-xl font-bold mb-4">{t.clients}</h3>
+              <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: 'rgba(255,255,255,0.15)' }} />
+              <h3 style={{ color: '#f1f5f9', fontSize: 20, fontWeight: 700, marginBottom: 16 }}>{t.clients}</h3>
               <div className="space-y-3 max-h-72 overflow-y-auto">
                 {clients.map((client) => (
                   <button
@@ -221,27 +223,27 @@ export default function TimerScreen() {
                     onClick={() => handleSelectClient(client.id)}
                     className="w-full rounded-2xl p-4 text-left transition-all"
                     style={{
-                      background: '#fafaf9',
-                      border: '1px solid rgba(0,0,0,0.06)',
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.08)',
                     }}
                   >
-                    <p className="text-stone-900 font-bold text-base">{client.name}</p>
-                    <p className="text-stone-500 text-sm mt-0.5">{client.address}</p>
-                    <p className="text-orange-500 text-sm font-semibold mt-1">{client.hourly_rate} kr/h</p>
+                    <p style={{ color: '#f1f5f9', fontWeight: 700, fontSize: 15 }}>{client.name}</p>
+                    <p style={{ color: '#64748b', fontSize: 13, marginTop: 2 }}>{client.address}</p>
+                    <p style={{ color: '#f97316', fontSize: 13, fontWeight: 600, marginTop: 4 }}>{client.hourly_rate} kr/h</p>
                   </button>
                 ))}
                 <button
                   onClick={() => handleSelectClient(null)}
                   className="w-full rounded-2xl p-4 text-left transition-all"
-                  style={{ background: '#fafaf9', border: '1px solid rgba(0,0,0,0.06)' }}
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
                 >
-                  <p className="text-stone-400 font-semibold text-base">{t.noClient}</p>
+                  <p style={{ color: '#475569', fontWeight: 600, fontSize: 15 }}>{t.noClient}</p>
                 </button>
               </div>
               <button
                 onClick={() => setShowClientPicker(false)}
-                className="mt-5 w-full rounded-2xl py-4 font-semibold text-base text-stone-500 transition-all"
-                style={{ background: '#f5f5f4', border: '1px solid rgba(0,0,0,0.06)' }}
+                className="mt-5 w-full rounded-2xl py-4 font-semibold text-base transition-all"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#64748b' }}
               >
                 {t.cancel}
               </button>
