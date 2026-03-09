@@ -23,7 +23,7 @@ const emptyForm: ClientFormData = {
 };
 
 export default function ClientsScreen() {
-  const { t, clients, addClient, updateClient, deleteClient } = useApp();
+  const { t, language, clients, addClient, updateClient, deleteClient } = useApp();
   const [showForm, setShowForm] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [form, setForm] = useState<ClientFormData>(emptyForm);
@@ -49,7 +49,7 @@ export default function ClientsScreen() {
       const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`;
       const res = await fetch(url, {
         headers: {
-          'Accept-Language': 'sv',
+          'Accept-Language': language,
           'User-Agent': 'AMix-PWA-TimeTracker/1.0 (https://github.com/AMix-hub/PWA)',
         },
       });
@@ -93,19 +93,59 @@ export default function ClientsScreen() {
     setShowForm(true);
   };
 
-  const handleSave = () => {
-    const data = {
+  const handleSave = async () => {
+    let lat = parseFloat(form.latitude);
+    let lon = parseFloat(form.longitude);
+
+    // Auto-geocode if address is provided but coordinates are still missing.
+    if (form.address.trim() && (isNaN(lat) || isNaN(lon))) {
+      setGeocoding(true);
+      setGeocodeStatus('idle');
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(form.address.trim())}&format=json&limit=1`;
+        const res = await fetch(url, {
+          headers: {
+            'Accept-Language': language,
+            'User-Agent': 'AMix-PWA-TimeTracker/1.0 (https://github.com/AMix-hub/PWA)',
+          },
+        });
+        const data = await res.json();
+        if (data && data.length > 0) {
+          lat = parseFloat(data[0].lat);
+          lon = parseFloat(data[0].lon);
+          setForm((prev) => ({
+            ...prev,
+            latitude: lat.toFixed(6),
+            longitude: lon.toFixed(6),
+          }));
+          setGeocodeStatus('success');
+        } else {
+          setGeocodeStatus('error');
+          setFormErrors({ coords: t.geocodeError });
+          setGeocoding(false);
+          return;
+        }
+      } catch {
+        setGeocodeStatus('error');
+        setFormErrors({ coords: t.geocodeError });
+        setGeocoding(false);
+        return;
+      }
+      setGeocoding(false);
+    }
+
+    const clientData = {
       name: form.name.trim(),
       address: form.address.trim(),
-      latitude: parseFloat(form.latitude),
-      longitude: parseFloat(form.longitude),
+      latitude: lat,
+      longitude: lon,
       hourly_rate: parseFloat(form.hourly_rate),
     };
 
     const errors: { name?: string; coords?: string; rate?: string } = {};
-    if (!data.name) errors.name = t.fieldRequired;
-    if (isNaN(data.latitude) || isNaN(data.longitude)) errors.coords = t.invalidCoords;
-    if (isNaN(data.hourly_rate)) errors.rate = t.invalidRate;
+    if (!clientData.name) errors.name = t.fieldRequired;
+    if (isNaN(clientData.latitude) || isNaN(clientData.longitude)) errors.coords = t.invalidCoords;
+    if (isNaN(clientData.hourly_rate)) errors.rate = t.invalidRate;
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -114,9 +154,9 @@ export default function ClientsScreen() {
 
     setFormErrors({});
     if (editingClient) {
-      updateClient({ ...data, id: editingClient.id });
+      updateClient({ ...clientData, id: editingClient.id });
     } else {
-      addClient(data);
+      addClient(clientData);
     }
     setShowForm(false);
   };
