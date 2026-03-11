@@ -17,6 +17,8 @@ interface AppContextType {
   addClient: (client: Omit<Client, 'id'>) => void;
   updateClient: (client: Client) => void;
   deleteClient: (id: string) => void;
+  lastAddedClientId: string | null;
+  clearLastAddedClient: () => void;
   
   // Timer
   activeTimer: ActiveTimer | null;
@@ -49,6 +51,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [nearbyClient, setNearbyClient] = useState<Client | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'timer' | 'clients' | 'logs' | 'map'>('timer');
+  const [lastAddedClientId, setLastAddedClientId] = useState<string | null>(null);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -119,6 +122,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const updated = [...clients, newClient];
     setClients(updated);
     saveClients(updated);
+    setLastAddedClientId(newClient.id);
+    setActiveTab('map');
   };
 
   const updateClient = (client: Client) => {
@@ -132,6 +137,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setClients(updated);
     saveClients(updated);
   };
+
+  const clearLastAddedClient = () => setLastAddedClientId(null);
 
   const startTimer = useCallback((clientId: string | null, clientName: string | null, hourlyRate: number) => {
     const timer: ActiveTimer = {
@@ -173,6 +180,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addClient,
         updateClient,
         deleteClient,
+        lastAddedClientId,
+        clearLastAddedClient,
         activeTimer,
         startTimer,
         stopTimer,
