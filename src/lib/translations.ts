@@ -64,6 +64,13 @@ export const translations = {
     fieldRequired: 'Obligatoriskt fält',
     invalidCoords: 'Ange giltiga koordinater (t.ex. använd sök-knappen)',
     invalidRate: 'Ange ett giltigt timpris',
+    iconTypeLabel: 'Markörstyp',
+    iconTypeDefault: 'Standard',
+    iconTypeWork: 'Arbetsplats',
+    iconTypeHome: 'Bostad',
+    iconTypeWarehouse: 'Lager',
+    iconTypeService: 'Service',
+    addedToMap: 'Tillagd på kartan',
   },
   en: {
     appName: 'Time Tracker',
@@ -128,6 +135,13 @@ export const translations = {
     fieldRequired: 'Required field',
     invalidCoords: 'Enter valid coordinates (e.g. use the search button)',
     invalidRate: 'Enter a valid hourly rate',
+    iconTypeLabel: 'Marker Type',
+    iconTypeDefault: 'Default',
+    iconTypeWork: 'Workplace',
+    iconTypeHome: 'Home',
+    iconTypeWarehouse: 'Warehouse',
+    iconTypeService: 'Service',
+    addedToMap: 'Added to map',
   },
 } as const;
 

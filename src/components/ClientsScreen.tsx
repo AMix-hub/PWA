@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/context/AppContext';
-import { Client } from '@/lib/clients';
+import { Client, ClientIconType, CLIENT_ICON_COLORS } from '@/lib/clients';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -12,6 +12,7 @@ interface ClientFormData {
   latitude: string;
   longitude: string;
   hourly_rate: string;
+  iconType: ClientIconType;
 }
 
 const emptyForm: ClientFormData = {
@@ -20,6 +21,7 @@ const emptyForm: ClientFormData = {
   latitude: '',
   longitude: '',
   hourly_rate: '',
+  iconType: 'default',
 };
 
 export default function ClientsScreen() {
@@ -87,6 +89,7 @@ export default function ClientsScreen() {
       latitude: String(client.latitude),
       longitude: String(client.longitude),
       hourly_rate: String(client.hourly_rate),
+      iconType: client.iconType ?? 'default',
     });
     setGeocodeStatus('idle');
     setFormErrors({});
@@ -140,6 +143,7 @@ export default function ClientsScreen() {
       latitude: lat,
       longitude: lon,
       hourly_rate: parseFloat(form.hourly_rate),
+      iconType: form.iconType,
     };
 
     const errors: { name?: string; coords?: string; rate?: string } = {};
@@ -231,7 +235,7 @@ export default function ClientsScreen() {
                   <div
                     className="w-11 h-11 rounded-xl flex-shrink-0 font-bold text-lg flex items-center justify-center"
                     style={{
-                      background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                      background: `linear-gradient(135deg, ${CLIENT_ICON_COLORS[client.iconType ?? 'default']}, ${CLIENT_ICON_COLORS[client.iconType ?? 'default']}bb)`,
                       color: '#ffffff',
                       minWidth: 44,
                       minHeight: 44,
@@ -523,6 +527,51 @@ export default function ClientsScreen() {
                           ⚠ {formErrors.coords}
                         </motion.p>
                       )}
+                    </div>
+
+                    {/* Icon Type Picker */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#a5b4fc', marginBottom: 8 }}>
+                        {t.iconTypeLabel}
+                      </label>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        {(Object.keys(CLIENT_ICON_COLORS) as ClientIconType[]).map((type) => {
+                          const color = CLIENT_ICON_COLORS[type];
+                          const iconTypeLabels: Record<ClientIconType, string> = {
+                            default: t.iconTypeDefault,
+                            work: t.iconTypeWork,
+                            home: t.iconTypeHome,
+                            warehouse: t.iconTypeWarehouse,
+                            service: t.iconTypeService,
+                          };
+                          const label = iconTypeLabels[type];
+                          const isSelected = form.iconType === type;
+                          return (
+                            <button
+                              key={type}
+                              type="button"
+                              onClick={() => setForm({ ...form, iconType: type })}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 6,
+                                padding: '7px 13px',
+                                borderRadius: 20,
+                                border: `2px solid ${isSelected ? color : 'rgba(255,255,255,0.12)'}`,
+                                background: isSelected ? `${color}22` : 'rgba(255,255,255,0.04)',
+                                color: isSelected ? color : '#64748b',
+                                fontSize: 13,
+                                fontWeight: isSelected ? 700 : 400,
+                                cursor: 'pointer',
+                                transition: 'all 0.18s ease',
+                              }}
+                            >
+                              <div style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0 }} />
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
 
                     {/* Hourly Rate */}
